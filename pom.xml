@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.money</groupId>
-	<artifactId>EqualSplit</artifactId>
+	<artifactId>SplitEase</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>EqualSplit</name>
+	<name>SplitEase</name>
 	<description>Split the money!!!</description>
 	<url/>
 	<licenses>
