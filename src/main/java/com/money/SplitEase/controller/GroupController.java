@@ -44,10 +44,10 @@ public class GroupController {
     @PutMapping("/{id}")
     public ResponseEntity<Optional<Group>> updateGroup(@PathVariable Long id, @Valid @RequestBody Group group) {
         log.info("Updating group ID {} with new name: {}", id, group.getName());
-        group.setId(id);
-        Optional<Group> updatedGroup = groupService.updateGroup(group);
+        Optional<Group> updatedGroup = groupService.updateGroup(id, group);
         return ResponseEntity.ok(updatedGroup);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {

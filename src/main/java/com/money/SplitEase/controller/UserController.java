@@ -42,11 +42,11 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Optional<User>> updateUser(@PathVariable Long id, @Valid @RequestBody User user) {
-        log.info("Updating user ID {} with new name: {}", id, user.getName());
-        user.setId(id);
-        Optional<User> updatedUser = userService.updateUser(user);
+        log.info("Updating user ID {} with new username: {}", id, user.getUsername());
+        Optional<User> updatedUser = userService.updateUser(id, user);
         return ResponseEntity.ok(updatedUser);
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteUser(@PathVariable Long id) {

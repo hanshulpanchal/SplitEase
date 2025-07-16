@@ -1,6 +1,7 @@
 package com.money.SplitEase.util;
 
 import com.money.SplitEase.model.Expense;
+import com.money.SplitEase.model.Group;
 import com.money.SplitEase.model.User;
 
 import java.math.BigDecimal;
@@ -64,6 +65,10 @@ public class DebtCalculator {
         }
 
         return new DebtSummary(debts, balances);
+    }
+
+    public Object calculateDebts(Group group) {
+        return null;
     }
 
     public record DebtSummary(
