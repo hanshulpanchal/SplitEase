@@ -38,7 +38,7 @@ public class GroupService {
     /**
      * Update group if it exists.
      */
-    public Optional<Group> updateGroup(Long id, Group updatedGroup) {
+    public Optional<Group> updateGroup(Group updatedGroup) {
         return groupRepository.findById(id).map(existing -> {
             existing.setName(updatedGroup.getName());
             existing.setMembers(updatedGroup.getMembers());

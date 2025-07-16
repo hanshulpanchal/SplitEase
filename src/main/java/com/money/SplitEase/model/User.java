@@ -44,4 +44,8 @@ public class User {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Object getName() {
+        return null;
+    }
 }
