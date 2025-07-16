@@ -62,11 +62,13 @@ public class ExpenseController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Optional<Expense>> updateExpense(@PathVariable Long id, @Valid @RequestBody Expense expense) {
+    public ResponseEntity<Expense> updateExpense(@PathVariable Long id, @Valid @RequestBody Expense expense) {
         log.info("Updating expense with ID: {}", id);
-        expense.setId(id);
-        return ResponseEntity.ok(expenseService.updateExpense(expense));
+        return expenseService.updateExpense(id, expense)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
