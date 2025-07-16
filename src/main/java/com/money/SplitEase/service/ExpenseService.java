@@ -3,9 +3,12 @@ package com.money.SplitEase.service;
 import com.money.SplitEase.model.Expense;
 import com.money.SplitEase.repository.ExpenseRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -33,15 +36,15 @@ public class ExpenseService {
     /**
      * Get all expenses.
      */
-    public List<Expense> getAllExpenses() {
+    public List<Expense> getAllExpenses(Pageable pageable) {
         return expenseRepository.findAll();
     }
 
     /**
      * Update an existing expense if it exists.
      */
-    public Optional<Expense> updateExpense(Long id, Expense updatedExpense) {
-        return expenseRepository.findById(id).map(existing -> {
+    public Optional<Expense> updateExpense(Expense updatedExpense) {
+        Optional<Expense> expense = expenseRepository.findById(id).map(existing -> {
             existing.setDescription(updatedExpense.getDescription());
             existing.setAmount(updatedExpense.getAmount());
             existing.setDate(updatedExpense.getDate());
@@ -49,6 +52,7 @@ public class ExpenseService {
             existing.setGroup(updatedExpense.getGroup());
             return expenseRepository.save(existing);
         });
+        return expense;
     }
 
     /**
@@ -86,5 +90,9 @@ public class ExpenseService {
      */
     public List<Expense> getExpensesByPayerAndMinAmount(Long payerId, BigDecimal minAmount) {
         return expenseRepository.findByPayerIdAndAmountGreaterThanEqual(payerId, minAmount);
+    }
+
+    public Page<Expense> getExpensesByDate(LocalDate date, Pageable pageable) {
+        return null;
     }
 }

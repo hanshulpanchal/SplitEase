@@ -50,4 +50,8 @@ public class Expense {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Throwable getGroupId() {
+        return null;
+    }
 }

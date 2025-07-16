@@ -38,7 +38,7 @@ public class UserService {
     /**
      * Update user details if the user exists.
      */
-    public Optional<User> updateUser(Long id, User updatedUser) {
+    public Optional<User> updateUser(User updatedUser) {
         return userRepository.findById(id).map(existing -> {
             existing.setUsername(updatedUser.getUsername());
             existing.setEmail(updatedUser.getEmail());
