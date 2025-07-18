@@ -48,7 +48,7 @@ public class ExpenseController {
         Pageable pageable = PageRequest.of(page, size);
         Page<Expense> expenses = (date != null) ?
                 expenseService.getExpensesByDate(date, pageable) :
-                expenseService.getAllExpenses(pageable);
+                (Page<Expense>) expenseService.getAllExpenses(pageable);
         return ResponseEntity.ok(expenses);
     }
 

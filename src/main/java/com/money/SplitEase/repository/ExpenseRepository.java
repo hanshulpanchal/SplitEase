@@ -17,7 +17,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     /**
      * Find all expenses by a specific group.
      */
-    List<Expense> findByGroupId(Long groupId);
+    List<Expense> findByGroup_Id(Long groupId);
 
     /**
      * Find all expenses paid by a specific user.
@@ -27,7 +27,7 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     /**
      * Find expenses by group within a date range.
      */
-    List<Expense> findByGroupIdAndDateBetween(Long groupId, LocalDateTime startDate, LocalDateTime endDate);
+    List<Expense> findByGroup_IdAndDateBetween(Long groupId, LocalDateTime startDate, LocalDateTime endDate);
 
     /**
      * Find expenses by payer with amount greater than or equal to the given threshold.

@@ -40,7 +40,7 @@ public class Expense {
     private User payer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_id", nullable = false)
+    @JoinColumn(name = "group_d", nullable = false)
     @ToString.Exclude
     private Group group;
 

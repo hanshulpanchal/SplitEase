@@ -8,6 +8,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -50,8 +52,8 @@ class ExpenseServiceTest {
                 .description("Lunch")
                 .amount(BigDecimal.valueOf(500))
                 .date(LocalDateTime.now())
-                .payer((org.apache.catalina.User) sampleUser)
-                .group((org.apache.catalina.Group) sampleGroup)
+                .payer(sampleUser)
+                .group(sampleGroup)
                 .build();
     }
 
@@ -83,9 +85,10 @@ class ExpenseServiceTest {
 
     @Test
     void testGetAllExpenses() {
+        Pageable pageable = PageRequest.of(0, 10);
         when(expenseRepository.findAll()).thenReturn(List.of(sampleExpense));
 
-        List<Expense> all = expenseService.getAllExpenses();
+        List<Expense> all = expenseService.getAllExpenses(pageable);
         assertEquals(1, all.size());
     }
 
@@ -96,8 +99,8 @@ class ExpenseServiceTest {
                 .description("Dinner")
                 .amount(BigDecimal.valueOf(700))
                 .date(LocalDateTime.now())
-                .payer((org.apache.catalina.User) sampleUser)
-                .group((org.apache.catalina.Group) sampleGroup)
+                .payer(sampleUser)
+                .group(sampleGroup)
                 .build();
 
         when(expenseRepository.findById(1L)).thenReturn(Optional.of(sampleExpense));
@@ -127,7 +130,7 @@ class ExpenseServiceTest {
 
     @Test
     void testGetExpensesByGroupId() {
-        when(expenseRepository.findByGroupId(1L)).thenReturn(List.of(sampleExpense));
+        when(expenseRepository.findByGroup_Id(1L)).thenReturn(List.of(sampleExpense));
 
         List<Expense> result = expenseService.getExpensesByGroupId(1L);
         assertEquals(1, result.size());
@@ -146,7 +149,7 @@ class ExpenseServiceTest {
         LocalDateTime start = LocalDateTime.now().minusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(1);
 
-        when(expenseRepository.findByGroupIdAndDateBetween(1L, start, end)).thenReturn(List.of(sampleExpense));
+        when(expenseRepository.findByGroup_IdAndDateBetween(1L, start, end)).thenReturn(List.of(sampleExpense));
 
         List<Expense> result = expenseService.getExpensesByGroupIdAndDateRange(1L, start, end);
         assertEquals(1, result.size());
