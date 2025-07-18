@@ -1,0 +1,111 @@
+package com.money.SplitEase.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.money.SplitEase.model.Group;
+import com.money.SplitEase.service.GroupService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.beans.factory.annotation.Autowired;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(GroupController.class)
+@Import(GroupControllerTest.MockConfig.class)
+class GroupControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @Autowired
+    private GroupService groupService;
+
+    private Group sampleGroup;
+
+    @BeforeEach
+    void setUp() {
+        sampleGroup = Group.builder()
+                .id(1L)
+                .name("Test Group")
+                .build();
+    }
+
+    @TestConfiguration
+    static class MockConfig {
+        @Bean
+        public GroupService groupService() {
+            return Mockito.mock(GroupService.class);
+        }
+    }
+
+    @Test
+    void testCreateGroup() throws Exception {
+        Mockito.when(groupService.createGroup(any(Group.class))).thenReturn(sampleGroup);
+
+        mockMvc.perform(post("/api/groups")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sampleGroup)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Test Group"));
+    }
+
+    @Test
+    void testGetGroupByIdFound() throws Exception {
+        Mockito.when(groupService.getGroupById(1L)).thenReturn(Optional.of(sampleGroup));
+
+        mockMvc.perform(get("/api/groups/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("Test Group"));
+    }
+
+    @Test
+    void testGetGroupByIdNotFound() throws Exception {
+        Mockito.when(groupService.getGroupById(99L)).thenReturn(Optional.empty());
+
+        mockMvc.perform(get("/api/groups/99"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testGetAllGroups() throws Exception {
+        Mockito.when(groupService.getAllGroups()).thenReturn(List.of(sampleGroup));
+
+        mockMvc.perform(get("/api/groups"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1));
+    }
+
+    @Test
+    void testUpdateGroup() throws Exception {
+        Mockito.when(groupService.updateGroup(eq(1L), any(Group.class))).thenReturn(Optional.of(sampleGroup));
+
+        mockMvc.perform(put("/api/groups/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(sampleGroup)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1L));
+    }
+
+    @Test
+    void testDeleteGroup() throws Exception {
+        mockMvc.perform(delete("/api/groups/1"))
+                .andExpect(status().isNoContent());
+    }
+}

@@ -51,7 +51,7 @@ public class Expense {
     @UpdateTimestamp
     private LocalDateTime updatedAt;
 
-    public Throwable getGroupId() {
-        return null;
+    public Long getGroupId() {
+        return group != null ? group.getId() : null;
     }
 }
