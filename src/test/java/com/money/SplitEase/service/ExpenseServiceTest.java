@@ -8,6 +8,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -86,10 +87,14 @@ class ExpenseServiceTest {
     @Test
     void testGetAllExpenses() {
         Pageable pageable = PageRequest.of(0, 10);
-        when(expenseRepository.findAll()).thenReturn(List.of(sampleExpense));
+        List<Expense> expenses = List.of(sampleExpense);
+        PageImpl<Expense> expensePage = new PageImpl<>(expenses, pageable, expenses.size());
 
-        List<Expense> all = expenseService.getAllExpenses(pageable);
-        assertEquals(1, all.size());
+        when(expenseRepository.findAll(pageable)).thenReturn(expensePage);
+
+        var result = expenseService.getAllExpenses(pageable);
+        assertEquals(1, result.getTotalElements());
+        assertEquals("Lunch", result.getContent().get(0).getDescription());
     }
 
     @Test
@@ -130,7 +135,7 @@ class ExpenseServiceTest {
 
     @Test
     void testGetExpensesByGroupId() {
-        when(expenseRepository.findByGroup_Id(1L)).thenReturn(List.of(sampleExpense));
+        when(expenseRepository.findByGroupId(1L)).thenReturn(List.of(sampleExpense));
 
         List<Expense> result = expenseService.getExpensesByGroupId(1L);
         assertEquals(1, result.size());
@@ -149,7 +154,7 @@ class ExpenseServiceTest {
         LocalDateTime start = LocalDateTime.now().minusDays(1);
         LocalDateTime end = LocalDateTime.now().plusDays(1);
 
-        when(expenseRepository.findByGroup_IdAndDateBetween(1L, start, end)).thenReturn(List.of(sampleExpense));
+        when(expenseRepository.findByGroupIdAndDateBetween(1L, start, end)).thenReturn(List.of(sampleExpense));
 
         List<Expense> result = expenseService.getExpensesByGroupIdAndDateRange(1L, start, end);
         assertEquals(1, result.size());

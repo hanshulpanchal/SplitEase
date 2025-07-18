@@ -27,8 +27,8 @@ public class ExpenseService {
         return expenseRepository.findById(id);
     }
 
-    public List<Expense> getAllExpenses(Pageable pageable) {
-        return expenseRepository.findAll(); // You can add pagination support later
+    public Page<Expense> getAllExpenses(Pageable pageable) {
+        return expenseRepository.findAll(pageable); // You can add pagination support later
     }
 
     public Optional<Expense> updateExpense(Long id, Expense updatedExpense) {
@@ -49,7 +49,7 @@ public class ExpenseService {
     }
 
     public List<Expense> getExpensesByGroupId(Long groupId) {
-        return expenseRepository.findByGroup_Id(groupId);
+        return expenseRepository.findByGroupId(groupId);
     }
 
     public List<Expense> getExpensesByPayerId(Long payerId) {
@@ -57,7 +57,7 @@ public class ExpenseService {
     }
 
     public List<Expense> getExpensesByGroupIdAndDateRange(Long groupId, LocalDateTime start, LocalDateTime end) {
-        return expenseRepository.findByGroup_IdAndDateBetween(groupId, start, end);
+        return expenseRepository.findByGroupIdAndDateBetween(groupId, start, end);
     }
 
     public List<Expense> getExpensesByPayerAndMinAmount(Long payerId, BigDecimal minAmount) {
