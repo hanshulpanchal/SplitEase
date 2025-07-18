@@ -12,9 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-        import java.time.LocalDate;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -26,7 +25,9 @@ public class ExpenseController {
 
     @PostMapping
     public ResponseEntity<Expense> createExpense(@Valid @RequestBody Expense expense) {
-        log.info("Creating new expense for group: {}", expense.getGroupId());
+        // Assuming expense.getGroup() is not null and group has an ID set
+        log.info("Creating new expense for group: {}",
+                expense.getGroup() != null ? expense.getGroup().getId() : "null");
         Expense created = expenseService.createExpense(expense);
         return new ResponseEntity<>(created, HttpStatus.CREATED);
     }
@@ -47,7 +48,7 @@ public class ExpenseController {
         Pageable pageable = PageRequest.of(page, size);
         Page<Expense> expenses = (date != null) ?
                 expenseService.getExpensesByDate(date, pageable) :
-                (Page<Expense>) expenseService.getAllExpenses(pageable);
+                expenseService.getAllExpenses(pageable);
         return ResponseEntity.ok(expenses);
     }
 
@@ -68,7 +69,6 @@ public class ExpenseController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteExpense(@PathVariable Long id) {
