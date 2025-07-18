@@ -49,7 +49,7 @@ public class ExpenseService {
     }
 
     public List<Expense> getExpensesByGroupId(Long groupId) {
-        return expenseRepository.findByGroupId(groupId);
+        return expenseRepository.findByGroup_Id(groupId);
     }
 
     public List<Expense> getExpensesByPayerId(Long payerId) {
@@ -57,7 +57,7 @@ public class ExpenseService {
     }
 
     public List<Expense> getExpensesByGroupIdAndDateRange(Long groupId, LocalDateTime start, LocalDateTime end) {
-        return expenseRepository.findByGroupIdAndDateBetween(groupId, start, end);
+        return expenseRepository.findByGroup_IdAndDateBetween(groupId, start, end);
     }
 
     public List<Expense> getExpensesByPayerAndMinAmount(Long payerId, BigDecimal minAmount) {
@@ -65,6 +65,6 @@ public class ExpenseService {
     }
 
     public Page<Expense> getExpensesByDate(LocalDate date, Pageable pageable) {
-        return Page.empty(); // placeholder until implemented
+        return expenseRepository.findAll(pageable);
     }
 }

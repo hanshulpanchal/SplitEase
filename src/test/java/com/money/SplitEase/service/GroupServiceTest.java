@@ -39,7 +39,7 @@ class GroupServiceTest {
         sampleGroup = Group.builder()
                 .id(1L)
                 .name("Trip")
-                .members(Set.of((org.apache.catalina.User) sampleUser))
+                .members(Set.of(sampleUser))
                 .expenses(Collections.emptySet())
                 .build();
     }
@@ -83,7 +83,7 @@ class GroupServiceTest {
         Group updatedGroup = Group.builder()
                 .id(1L)
                 .name("Trip 2025")
-                .members(Set.of((org.apache.catalina.User) sampleUser))
+                .members(Set.of(sampleUser))
                 .expenses(Collections.emptySet())
                 .build();
 
