@@ -3,6 +3,10 @@
 
 package com.money.SplitEase.controller;
 
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.money.SplitEase.model.User;
 import com.money.SplitEase.service.UserService;
@@ -23,10 +27,13 @@ import java.util.Optional;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-        import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
 
 @WebMvcTest(UserController.class)
 @Import(UserControllerTest.MockConfig.class)
+@AutoConfigureMockMvc(addFilters = false)
+
 class UserControllerTest {
 
     @Autowired
@@ -46,8 +53,10 @@ class UserControllerTest {
                 .id(1L)
                 .username("testuser")
                 .email("test@example.com")
+                .password("testpass")  // ✅ Add password if required
                 .build();
     }
+
 
     @TestConfiguration
     static class MockConfig {

@@ -47,4 +47,9 @@ public class Group {
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public Set<User> getUsers() {
+        return this.members;
+    }
+
 }

@@ -4,15 +4,16 @@ import com.money.SplitEase.model.User;
 import com.money.SplitEase.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class) // ✅ Use this instead of @SpringBootTest
 class UserServiceTest {
 
     @Mock
@@ -25,8 +26,6 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         sampleUser = User.builder()
                 .id(1L)
                 .username("john")
@@ -68,6 +67,7 @@ class UserServiceTest {
 
         List<User> users = userService.getAllUsers();
         assertEquals(1, users.size());
+        assertEquals("john", users.get(0).getUsername());
     }
 
     @Test
@@ -121,6 +121,7 @@ class UserServiceTest {
 
         Optional<User> result = userService.getUserByUsername("john");
         assertTrue(result.isPresent());
+        assertEquals("john", result.get().getUsername());
     }
 
     @Test
@@ -129,6 +130,7 @@ class UserServiceTest {
 
         Optional<User> result = userService.getUserByEmail("john@example.com");
         assertTrue(result.isPresent());
+        assertEquals("john@example.com", result.get().getEmail());
     }
 
     @Test

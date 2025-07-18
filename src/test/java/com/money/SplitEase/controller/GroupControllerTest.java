@@ -1,5 +1,10 @@
 package com.money.SplitEase.controller;
-
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.security.config.Customizer;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
+import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.context.annotation.Bean;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.money.SplitEase.model.Group;
 import com.money.SplitEase.service.GroupService;
@@ -23,7 +28,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(GroupController.class)
-@Import(GroupControllerTest.MockConfig.class)
+@Import({GroupControllerTest.MockConfig.class, GroupControllerTest.TestSecurityConfig.class})
 class GroupControllerTest {
 
     @Autowired
@@ -108,4 +113,17 @@ class GroupControllerTest {
         mockMvc.perform(delete("/api/groups/1"))
                 .andExpect(status().isNoContent());
     }
+
+    @TestConfiguration
+    static class TestSecurityConfig {
+        @Bean
+        public SecurityFilterChain testFilterChain(HttpSecurity http) throws Exception {
+            http
+                    .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
+                    .csrf(csrf -> csrf.disable())
+                    .httpBasic(Customizer.withDefaults());
+            return http.build();
+        }
+    }
+
 }

@@ -2,11 +2,8 @@ package com.money.SplitEase.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -22,20 +19,22 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(csrf -> csrf.disable())
-                .cors(cors -> {}) // enables cors with custom bean
+                .cors(cors -> {}) // Enable CORS using custom bean
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/swagger-ui/**",
                                 "/swagger-ui.html",
-                                "/webjars/**",
                                 "/swagger-resources/**",
-                                "/test",
-                                "/error"
+                                "/webjars/**",
+                                "/test",           // your test endpoints
+                                "/error",          // error pages
+                                "/h2-console/**",  // optional: if using H2
+                                "/api/**"          // allow all APIs if needed for testing
                         ).permitAll()
-                        .anyRequest().authenticated()
+                        .anyRequest().authenticated() // other requests require login
                 )
-                .httpBasic(basic -> {});  // cleaner style for basic auth
+                .httpBasic(httpBasic -> {}); // default HTTP Basic auth
 
         return http.build();
     }
@@ -45,12 +44,10 @@ public class SecurityConfig {
         var source = new UrlBasedCorsConfigurationSource();
         var config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOriginPatterns(List.of("*"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedOriginPatterns(List.of("*")); // allow all origins
+        config.setAllowedHeaders(List.of("*"));         // allow all headers
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS")); // allow all methods
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);
     }
-
-
 }

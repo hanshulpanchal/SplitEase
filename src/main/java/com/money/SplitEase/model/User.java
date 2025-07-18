@@ -46,4 +46,9 @@ public class User {
     private LocalDateTime updatedAt;
 
 
+    public String getName() {
+        return this.username;
+    }
+
+
 }

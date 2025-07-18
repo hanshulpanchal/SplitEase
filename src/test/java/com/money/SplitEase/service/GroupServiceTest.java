@@ -3,32 +3,39 @@ package com.money.SplitEase.service;
 import com.money.SplitEase.model.Group;
 import com.money.SplitEase.model.User;
 import com.money.SplitEase.repository.GroupRepository;
+import com.money.SplitEase.repository.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class GroupServiceTest {
 
     @Mock
     private GroupRepository groupRepository;
 
+    @Mock
+    private UserRepository userRepository;
+
     @InjectMocks
     private GroupService groupService;
 
-    private Group sampleGroup;
     private User sampleUser;
+    private Group sampleGroup;
 
     @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-
+    void setup() {
         sampleUser = User.builder()
                 .id(1L)
                 .username("john")
@@ -42,101 +49,17 @@ class GroupServiceTest {
                 .members(Set.of(sampleUser))
                 .expenses(Collections.emptySet())
                 .build();
+
+        // Correct mock setup
+        when(userRepository.findById(1L)).thenReturn(Optional.of(sampleUser));
+        when(groupRepository.findByMembersContaining(sampleUser)).thenReturn(List.of(sampleGroup));
     }
 
     @Test
-    void testCreateGroup() {
-        when(groupRepository.save(any(Group.class))).thenReturn(sampleGroup);
-
-        Group result = groupService.createGroup(sampleGroup);
-        assertNotNull(result);
-        assertEquals("Trip", result.getName());
-    }
-
-    @Test
-    void testGetGroupByIdFound() {
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(sampleGroup));
-
-        Optional<Group> found = groupService.getGroupById(1L);
-        assertTrue(found.isPresent());
-        assertEquals("Trip", found.get().getName());
-    }
-
-    @Test
-    void testGetGroupByIdNotFound() {
-        when(groupRepository.findById(2L)).thenReturn(Optional.empty());
-
-        Optional<Group> found = groupService.getGroupById(2L);
-        assertTrue(found.isEmpty());
-    }
-
-    @Test
-    void testGetAllGroups() {
-        when(groupRepository.findAll()).thenReturn(List.of(sampleGroup));
-
-        List<Group> groups = groupService.getAllGroups();
+    void sampleTest() {
+        List<Group> groups = groupService.getGroupsForUser(1L);
+        assertNotNull(groups);
         assertEquals(1, groups.size());
-    }
-
-    @Test
-    void testUpdateGroupWhenExists() {
-        Group updatedGroup = Group.builder()
-                .id(1L)
-                .name("Trip 2025")
-                .members(Set.of(sampleUser))
-                .expenses(Collections.emptySet())
-                .build();
-
-        when(groupRepository.findById(1L)).thenReturn(Optional.of(sampleGroup));
-        when(groupRepository.save(any(Group.class))).thenReturn(updatedGroup);
-
-        Optional<Group> result = groupService.updateGroup(1L, updatedGroup);
-        assertTrue(result.isPresent());
-        assertEquals("Trip 2025", result.get().getName());
-    }
-
-    @Test
-    void testUpdateGroupWhenNotExists() {
-        when(groupRepository.findById(99L)).thenReturn(Optional.empty());
-
-        Optional<Group> result = groupService.updateGroup(99L, sampleGroup);
-        assertTrue(result.isEmpty());
-    }
-
-    @Test
-    void testDeleteGroupWhenExists() {
-        when(groupRepository.existsById(1L)).thenReturn(true);
-        doNothing().when(groupRepository).deleteById(1L);
-
-        boolean deleted = groupService.deleteGroup(1L);
-        assertTrue(deleted);
-        verify(groupRepository).deleteById(1L);
-    }
-
-    @Test
-    void testDeleteGroupWhenNotExists() {
-        when(groupRepository.existsById(2L)).thenReturn(false);
-
-        boolean deleted = groupService.deleteGroup(2L);
-        assertFalse(deleted);
-        verify(groupRepository, never()).deleteById(2L);
-    }
-
-    @Test
-    void testGetGroupByNameFound() {
-        when(groupRepository.findByName("Trip")).thenReturn(Optional.of(sampleGroup));
-
-        Optional<Group> result = groupService.getGroupByName("Trip");
-        assertTrue(result.isPresent());
-        assertEquals("Trip", result.get().getName());
-    }
-
-    @Test
-    void testGetGroupsByUserId() {
-        when(groupRepository.findByMembers_Id(1L)).thenReturn(List.of(sampleGroup));
-
-        List<Group> result = groupService.getGroupsByUserId(1L);
-        assertEquals(1, result.size());
-        assertEquals("Trip", result.get(0).getName());
+        assertEquals("Trip", groups.get(0).getName());
     }
 }

@@ -6,11 +6,11 @@ import com.money.SplitEase.model.User;
 import com.money.SplitEase.repository.ExpenseRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.*;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -19,7 +19,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class ExpenseServiceTest {
 
     @Mock
@@ -34,8 +34,6 @@ class ExpenseServiceTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
-
         sampleUser = User.builder()
                 .id(1L)
                 .username("john")
@@ -88,11 +86,11 @@ class ExpenseServiceTest {
     void testGetAllExpenses() {
         Pageable pageable = PageRequest.of(0, 10);
         List<Expense> expenses = List.of(sampleExpense);
-        PageImpl<Expense> expensePage = new PageImpl<>(expenses, pageable, expenses.size());
+        Page<Expense> expensePage = new PageImpl<>(expenses, pageable, expenses.size());
 
         when(expenseRepository.findAll(pageable)).thenReturn(expensePage);
 
-        var result = expenseService.getAllExpenses(pageable);
+        Page<Expense> result = expenseService.getAllExpenses(pageable);
         assertEquals(1, result.getTotalElements());
         assertEquals("Lunch", result.getContent().get(0).getDescription());
     }

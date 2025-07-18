@@ -9,68 +9,107 @@ import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
+
 public class DebtCalculator {
 
+    /**
+     * Calculates debts and final balances for a list of users based on given expenses.
+     */
     public static DebtSummary calculateDebts(List<Expense> expenses, List<User> users) {
-        var balances = new HashMap<User, BigDecimal>();
-        var debts = new HashMap<User, Map<User, BigDecimal>>();
+        Map<User, BigDecimal> balances = new HashMap<>();
+        Map<User, Map<User, BigDecimal>> debts = new HashMap<>();
 
-        // Initialize balances & debts
+        // Initialize balances and debts
         users.forEach(user -> {
             balances.put(user, BigDecimal.ZERO);
-            debts.put(user, users.stream()
-                    .filter(other -> !other.equals(user))
-                    .collect(Collectors.toMap(other -> other, other -> BigDecimal.ZERO)));
+            debts.put(user, new HashMap<>());
         });
 
-        // Calculate balances after expenses
-        expenses.forEach(expense -> {
-            var payer = expense.getPayer();
-            var amount = expense.getAmount();
-            var splitAmount = amount.divide(BigDecimal.valueOf(users.size()), 2, RoundingMode.HALF_UP);
+        // Update balances based on each expense
+        for (Expense expense : expenses) {
+            User payer = expense.getPayer();
+            BigDecimal amount = expense.getAmount();
+            BigDecimal splitAmount = amount.divide(BigDecimal.valueOf(users.size()), 2, RoundingMode.HALF_UP);
 
+            balances.put(payer, balances.get(payer).add(amount.subtract(splitAmount)));
 
+            for (User user : users) {
+                if (!user.equals(payer)) {
+                    balances.put(user, balances.get(user).subtract(splitAmount));
+                }
+            }
+        }
 
-            balances.compute((User) payer, (u, old) -> (old != null ? old : BigDecimal.ZERO).add(amount.subtract(splitAmount)));
-            users.stream()
-                    .filter(user -> !user.equals(payer))
-                    .forEach(user -> balances.compute(user, (u, old) -> old.subtract(splitAmount)));
-        });
-
-        // Calculate debts
-        var balanceList = new ArrayList<>(balances.entrySet());
+        // Settle debts
+        List<Map.Entry<User, BigDecimal>> balanceList = new ArrayList<>(balances.entrySet());
         balanceList.sort(Map.Entry.comparingByValue());
 
         int i = 0, j = balanceList.size() - 1;
         while (i < j) {
-            var debtorEntry = balanceList.get(i);
-            var creditorEntry = balanceList.get(j);
+            User debtor = balanceList.get(i).getKey();
+            User creditor = balanceList.get(j).getKey();
 
-            var debtor = debtorEntry.getKey();
-            var creditor = creditorEntry.getKey();
+            BigDecimal debtorBalance = balanceList.get(i).getValue();
+            BigDecimal creditorBalance = balanceList.get(j).getValue();
 
-            var debtAmount = debtorEntry.getValue().negate().min(creditorEntry.getValue());
-            if (debtAmount.compareTo(BigDecimal.ZERO) > 0) {
-                debts.get(debtor).put(creditor, debtAmount);
+            BigDecimal amount = debtorBalance.negate().min(creditorBalance);
 
-                balances.put(debtor, balances.get(debtor).add(debtAmount));
-                balances.put(creditor, balances.get(creditor).subtract(debtAmount));
+            if (amount.compareTo(BigDecimal.ZERO) > 0) {
+                debts.get(debtor).put(creditor, amount);
 
-                debtorEntry.setValue(balances.get(debtor));
-                creditorEntry.setValue(balances.get(creditor));
+                BigDecimal newDebtorBalance = debtorBalance.add(amount);
+                BigDecimal newCreditorBalance = creditorBalance.subtract(amount);
+
+                balanceList.get(i).setValue(newDebtorBalance);
+                balanceList.get(j).setValue(newCreditorBalance);
+                balances.put(debtor, newDebtorBalance);
+                balances.put(creditor, newCreditorBalance);
             }
 
-            if (debtorEntry.getValue().compareTo(BigDecimal.ZERO) == 0) i++;
-            if (creditorEntry.getValue().compareTo(BigDecimal.ZERO) == 0) j--;
+            if (balanceList.get(i).getValue().compareTo(BigDecimal.ZERO) == 0) i++;
+            if (balanceList.get(j).getValue().compareTo(BigDecimal.ZERO) == 0) j--;
         }
 
         return new DebtSummary(debts, balances);
     }
 
-    public Object calculateDebts(Group group) {
-        return null;
+    /**
+     * Overloaded method to calculate debts from a Group object.
+     */
+    public static Map<String, Map<String, Double>> calculateDebts(Group group) {
+        Map<String, Map<String, Double>> result = new HashMap<>();
+
+        if (group == null || group.getExpenses() == null || group.getMembers() == null || group.getExpenses().isEmpty()) {
+            return result;
+        }
+
+        DebtSummary summary = DebtCalculator.calculateDebts(
+                new ArrayList<>(group.getExpenses()),
+                new ArrayList<>(group.getMembers())
+        );
+
+        for (Map.Entry<User, Map<User, BigDecimal>> debtorEntry : summary.debts().entrySet()) {
+            String debtorName = debtorEntry.getKey().getUsername(); // Use getUsername() if available
+
+            Map<String, Double> userDebts = new HashMap<>();
+            for (Map.Entry<User, BigDecimal> inner : debtorEntry.getValue().entrySet()) {
+                if (inner.getValue().compareTo(BigDecimal.ZERO) > 0) {
+                    userDebts.put(inner.getKey().getUsername(), inner.getValue().doubleValue());
+                }
+            }
+
+            if (!userDebts.isEmpty()) {
+                result.put(debtorName, userDebts);
+            }
+        }
+
+        return result;
     }
 
+
+    /**
+     * Record to hold the results.
+     */
     public record DebtSummary(
             Map<User, Map<User, BigDecimal>> debts,
             Map<User, BigDecimal> finalBalances
