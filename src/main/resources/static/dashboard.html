@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SplitEase Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f6f8;
+      display: flex;
+      height: 100vh;
+    }
+    .sidebar {
+      width: 240px;
+      background-color: #4c51bf;
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 1rem;
+    }
+    .sidebar h2 {
+      margin-bottom: 2rem;
+      font-size: 1.6rem;
+      text-align: center;
+    }
+    .nav-link {
+      margin: 0.5rem 0;
+      padding: 0.75rem 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+    }
+    .nav-link:hover,
+    .nav-link.active {
+      background-color: #5a67d8;
+    }
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+    .header {
+      background-color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 1px 5px rgba(0, 0, 0, 0.1);
+    }
+    .header h1 {
+      font-size: 1.5rem;
+      color: #333;
+    }
+    .logout-btn {
+      background-color: #e53e3e;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .logout-btn:hover {
+      background-color: #c53030;
+    }
+    .content {
+      padding: 2rem;
+    }
+    .welcome-box, .groups-box {
+      background-color: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    .groups-box h2 {
+      margin-bottom: 1rem;
+      color: #2d3748;
+    }
+    .create-btn {
+      margin: 1rem 0;
+      padding: 0.5rem 1rem;
+      background-color: #4c51bf;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .create-btn:hover {
+      background-color: #5a67d8;
+    }
+    .modal {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background-color: rgba(0,0,0,0.5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background-color: white;
+      padding: 2rem;
+      border-radius: 10px;
+      width: 400px;
+    }
+    .modal-content h3 {
+      margin-bottom: 1rem;
+    }
+    .modal-content input {
+      width: 100%;
+      padding: 0.6rem;
+      margin: 0.5rem 0;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    .member-list {
+      margin: 0.5rem 0;
+      background-color: #edf2f7;
+      padding: 0.5rem;
+      border-radius: 6px;
+    }
+    .modal-buttons {
+      margin-top: 1rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .modal-buttons button {
+      padding: 0.5rem 1rem;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .modal-buttons .save {
+      background-color: #38a169;
+      color: white;
+    }
+    .modal-buttons .cancel {
+      background-color: #e53e3e;
+      color: white;
+    }
+    #expenseForm input, #expenseForm select {
+      margin: 0.5rem 0;
+      padding: 0.6rem;
+      width: 100%;
+    }
+    #expenseForm button {
+      margin-top: 1rem;
+    }
+
+    /* Balance Section Styles */
+    .balances-box {
+      background: #fff;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+    }
+    .balance-item {
+      border-bottom: 1px solid #eee;
+      padding: 0.5rem 0;
+    }
+    .send-msg {
+      margin-top: 1rem;
+      background-color: #3182ce;
+      color: white;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+    .send-msg:hover {
+      background-color: #2b6cb0;
+    }
+  </style>
+</head>
+<body>
+<div class="sidebar">
+  <h2>SplitEase</h2>
+  <div class="nav-link active" onclick="showDashboard()">Dashboard</div>
+  <div class="nav-link" onclick="showGroups()">Groups</div>
+  <div class="nav-link" onclick="showExpenses()">Expenses</div>
+  <div class="nav-link" onclick="showBalances()">Balances</div>
+</div>
+
+<div class="main">
+  <div class="header">
+    <h1 id="pageTitle">Welcome to your Dashboard</h1>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+  <div class="content" id="mainContent">
+    <div class="welcome-box">
+      <h2>Hello, User!</h2>
+      <p>This is your SplitEase dashboard. Use the sidebar to navigate through groups, add expenses, and view balances.</p>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="groupModal">
+  <div class="modal-content">
+    <h3>Create New Group</h3>
+    <input type="text" id="groupName" placeholder="Group Name" />
+    <input type="text" id="memberUsername" placeholder="Add member username" />
+    <button class="create-btn" onclick="addMember()">Add Member</button>
+    <div class="member-list" id="membersList"></div>
+    <div class="modal-buttons">
+      <button class="save" onclick="createGroup()">Save Group</button>
+      <button class="cancel" onclick="closeModal()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  const token = localStorage.getItem("token");
+  if (!token) window.location.href = "index.html";
+
+  const mainContent = document.getElementById("mainContent");
+  const pageTitle = document.getElementById("pageTitle");
+
+  const groupModal = document.getElementById("groupModal");
+  const membersList = document.getElementById("membersList");
+  let addedMembers = [];
+
+  function logout() {
+    localStorage.removeItem("token");
+    window.location.href = "index.html";
+  }
+
+  function showDashboard() {
+    pageTitle.innerText = "Welcome to your Dashboard";
+    mainContent.innerHTML = `
+      <div class="welcome-box">
+        <h2>Hello, User!</h2>
+        <p>This is your SplitEase dashboard. Use the sidebar to navigate through groups, add expenses, and view balances.</p>
+      </div>
+    `;
+    updateActive("Dashboard");
+  }
+
+  function showGroups() {
+    pageTitle.innerText = "Groups";
+    mainContent.innerHTML = `
+      <div class="groups-box">
+        <h2>Your Groups</h2>
+        <button class="create-btn" onclick="openModal()">+ Create Group</button>
+        <p>Groups will be listed here...</p>
+      </div>
+    `;
+    updateActive("Groups");
+  }
+
+  function updateActive(tabName) {
+    document.querySelectorAll(".nav-link").forEach(link => {
+      link.classList.remove("active");
+      if (link.innerText === tabName) link.classList.add("active");
+    });
+  }
+
+  function openModal() {
+    groupModal.style.display = "flex";
+    document.getElementById("groupName").value = "";
+    document.getElementById("memberUsername").value = "";
+    addedMembers = [];
+    membersList.innerHTML = "";
+  }
+
+  function closeModal() {
+    groupModal.style.display = "none";
+  }
+
+  function addMember() {
+    const username = document.getElementById("memberUsername").value.trim();
+    if (username && !addedMembers.includes(username)) {
+      addedMembers.push(username);
+      membersList.innerHTML += `<div>${username}</div>`;
+      document.getElementById("memberUsername").value = "";
+    }
+  }
+
+  async function createGroup() {
+  const name = document.getElementById("groupName").value.trim();
+
+  if (!name || addedMembers.length === 0) {
+    alert("Group name and at least one member are required.");
+    return;
+  }
+
+  try {
+    const res = await fetch("http://localhost:8080/api/groups", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify({ name, memberNames: addedMembers }),
+    });
+
+    const data = await res.json();
+
+    if (res.ok) {
+      alert("✅ Group created successfully!");
+      closeModal();
+      showGroups();
+    } else {
+      console.error("❌ Server error:", data);
+      alert("Error: " + (data.message || JSON.stringify(data)));
+    }
+  } catch (error) {
+    console.error("❌ Network error:", error);
+    alert("Failed to create group: " + error.message);
+  }
+}
+
+
+
+  function showExpenses() {
+    pageTitle.innerText = "Expenses";
+    mainContent.innerHTML = `
+      <div class="groups-box">
+        <h2>Add Expense</h2>
+        <form id="expenseForm">
+          <input type="text" id="expenseDesc" placeholder="Description" required>
+          <input type="number" id="expenseAmount" placeholder="Amount (₹)" required>
+          <select id="expenseGroup" required>
+            <option value="">Select Group</option>
+          </select>
+          <button class="create-btn" type="submit">Add</button>
+        </form>
+        <h3 style="margin-top: 2rem;">Your Expenses</h3>
+        <div id="expenseList"></div>
+      </div>
+    `;
+    updateActive("Expenses");
+    loadUserGroups();
+    loadExpenses();
+
+    document.getElementById("expenseForm").addEventListener("submit", handleAddExpense);
+  }
+
+  async function loadUserGroups() {
+    try {
+      const res = await fetch("/api/groups", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const userGroups = await res.json();
+        const groupSelect = document.getElementById("expenseGroup");
+        groupSelect.innerHTML = `<option value="">Select Group</option>`;
+        userGroups.forEach(group => {
+          const opt = document.createElement("option");
+          opt.value = group.id;
+          opt.textContent = group.name;
+          groupSelect.appendChild(opt);
+        });
+      }
+    } catch (err) {
+      console.error("Failed to fetch groups:", err);
+    }
+  }
+
+  async function handleAddExpense(e) {
+    e.preventDefault();
+    const description = document.getElementById("expenseDesc").value.trim();
+    const amount = parseFloat(document.getElementById("expenseAmount").value);
+    const groupId = document.getElementById("expenseGroup").value;
+
+    if (!description || isNaN(amount) || !groupId) {
+      alert("Fill all fields properly");
+      return;
+    }
+
+    try {
+      const res = await fetch("/api/expenses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify({ description, amount, groupId })
+      });
+
+      if (res.ok) {
+        alert("Expense added!");
+        showExpenses();
+      } else {
+        const data = await res.json();
+        alert(data.message || "Error adding expense");
+      }
+    } catch (err) {
+      console.error("Add expense error:", err);
+      alert("Network error");
+    }
+  }
+
+  async function loadExpenses() {
+    try {
+      const res = await fetch("/api/expenses", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      if (res.ok) {
+        const expenses = await res.json();
+        const list = document.getElementById("expenseList");
+        if (!expenses.length) {
+          list.innerHTML = `<p>No expenses found.</p>`;
+          return;
+        }
+        list.innerHTML = expenses.map(exp => `
+          <div style="padding: 1rem; border-bottom: 1px solid #eee;">
+            <strong>${exp.description}</strong> - ₹${exp.amount} <br>
+            <small>Group: ${exp.group?.name || 'Unknown'}</small>
+          </div>
+        `).join("");
+      }
+    } catch (err) {
+      console.error("Failed to load expenses:", err);
+    }
+  }
+
+  // ==== BALANCES SECTION ====
+  function showBalances() {
+    pageTitle.innerText = "Group Balances";
+    mainContent.innerHTML = `
+      <div class="balances-box">
+        <h2>Select Group</h2>
+        <select id="balanceGroupSelect" style="padding: 0.6rem; width: 100%; margin-bottom: 1rem;">
+          <option value="">-- Choose Group --</option>
+        </select>
+        <div id="balanceResults"></div>
+      </div>
+    `;
+    updateActive("Balances");
+    loadGroupsForBalances();
+  }
+
+  async function loadGroupsForBalances() {
+    try {
+      const res = await fetch("/api/groups", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        const groups = await res.json();
+        const select = document.getElementById("balanceGroupSelect");
+        groups.forEach(g => {
+          const opt = document.createElement("option");
+          opt.value = g.id;
+          opt.textContent = g.name;
+          select.appendChild(opt);
+        });
+        select.addEventListener("change", e => fetchBalances(e.target.value));
+      }
+    } catch (err) {
+      console.error("Error loading groups for balances:", err);
+    }
+  }
+
+  async function fetchBalances(groupId) {
+    if (!groupId) return;
+    try {
+      const res = await fetch(`/api/groups/${groupId}/balances`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error("Failed to fetch balances");
+      const balances = await res.json();
+      renderBalances(balances);
+    } catch (err) {
+      console.error(err);
+      document.getElementById("balanceResults").innerHTML = `<p>Error loading balances.</p>`;
+    }
+  }
+
+  function renderBalances(balances) {
+    const container = document.getElementById("balanceResults");
+    if (!balances || balances.length === 0) {
+      container.innerHTML = `<p>No balances to show.</p>`;
+      return;
+    }
+
+    container.innerHTML = balances.map(b => `
+      <div class="balance-item">
+        <strong>${b.from}</strong> owes <strong>${b.to}</strong>: ₹${b.amount}
+      </div>
+    `).join("") + `
+      <button class="send-msg" onclick="sendBalanceMessages()">Send Message to Group</button>
+    `;
+  }
+
+  function sendBalanceMessages() {
+    const balancesText = Array.from(document.querySelectorAll(".balance-item"))
+      .map(div => div.textContent.trim())
+      .join("\n");
+
+    alert("Balance Message Sent to Group Members:\n\n" + balancesText);
+
+    // Optional: send via email API
+    // fetch("/api/email/send", { method: "POST", body: balancesText, headers: { ... } })
+  }
+
+  showDashboard();
+</script>
+</body>
+</html>

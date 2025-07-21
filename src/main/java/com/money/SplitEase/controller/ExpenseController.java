@@ -1,5 +1,6 @@
 package com.money.SplitEase.controller;
 
+import com.money.SplitEase.dto.ExpenseDTO;
 import com.money.SplitEase.model.Expense;
 import com.money.SplitEase.service.ExpenseService;
 import jakarta.validation.Valid;
@@ -24,13 +25,12 @@ public class ExpenseController {
     private final ExpenseService expenseService;
 
     @PostMapping
-    public ResponseEntity<Expense> createExpense(@Valid @RequestBody Expense expense) {
-        // Assuming expense.getGroup() is not null and group has an ID set
-        log.info("Creating new expense for group: {}",
-                expense.getGroup() != null ? expense.getGroup().getId() : "null");
-        Expense created = expenseService.createExpense(expense);
-        return new ResponseEntity<>(created, HttpStatus.CREATED);
+    public ResponseEntity<Expense> createExpense(@Valid @RequestBody ExpenseDTO dto) {
+        Expense entity = expenseService.convertToEntity(dto);
+        Expense saved = expenseService.createExpense(entity);
+        return new ResponseEntity<>(saved, HttpStatus.CREATED);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Expense> getExpenseById(@PathVariable Long id) {
@@ -40,18 +40,24 @@ public class ExpenseController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<Expense>> getAllExpenses(
+    public ResponseEntity<?> getAllExpenses(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
             @RequestParam(required = false) LocalDate date
     ) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Expense> expenses = (date != null) ?
-                expenseService.getExpensesByDate(date, pageable) :
-
-                expenseService.getAllExpenses(pageable);
-        return ResponseEntity.ok(expenses);
+        try {
+            Pageable pageable = PageRequest.of(page, size);
+            Page<Expense> expenses = (date != null)
+                    ? expenseService.getExpensesByDate(date, pageable)
+                    : expenseService.getAllExpenses(pageable);
+            return ResponseEntity.ok(expenses);
+        } catch (Exception e) {
+            e.printStackTrace(); // Log full stack trace
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error while fetching expenses: " + e.getMessage());
+        }
     }
+
 
     @GetMapping("/group/{groupId}")
     public ResponseEntity<List<Expense>> getExpensesByGroupId(@PathVariable Long groupId) {

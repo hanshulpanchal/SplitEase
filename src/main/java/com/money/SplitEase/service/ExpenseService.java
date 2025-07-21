@@ -1,7 +1,11 @@
 package com.money.SplitEase.service;
 
+import com.money.SplitEase.dto.ExpenseDTO;
 import com.money.SplitEase.model.Expense;
+import com.money.SplitEase.model.Group;
+import com.money.SplitEase.model.User;
 import com.money.SplitEase.repository.ExpenseRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,8 +24,10 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
 
     public Expense createExpense(Expense expense) {
+        System.out.println("==> [ExpenseService] Creating expense for group: " + expense.getGroup().getId());
         return expenseRepository.save(expense);
     }
+
 
     public Optional<Expense> getExpenseById(Long id) {
         return expenseRepository.findById(id);
@@ -67,4 +73,23 @@ public class ExpenseService {
     public Page<Expense> getExpensesByDate(LocalDate date, Pageable pageable) {
         return expenseRepository.findAll(pageable);
     }
+
+    public Expense convertToEntity(ExpenseDTO dto) {
+        Expense expense = new Expense();
+        expense.setId(dto.getId());
+        expense.setDescription(dto.getDescription());
+        expense.setAmount(dto.getAmount());
+        expense.setDate(dto.getDate());
+
+        User payer = new User();
+        payer.setId(dto.getPayerId());
+        expense.setPayer(payer);
+
+        Group group = new Group();
+        group.setId(dto.getGroupId());
+        expense.setGroup(group);
+
+        return expense;
+    }
+
 }

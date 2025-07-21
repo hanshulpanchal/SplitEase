@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>SplitEase Login</title>
+    <style>
+        body {
+          margin: 0;
+          font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+          background: linear-gradient(to right, #667eea, #764ba2);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 100vh;
+        }
+
+        .login-container {
+          background: white;
+          padding: 30px 40px;
+          border-radius: 15px;
+          box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+          width: 100%;
+          max-width: 400px;
+          text-align: center;
+        }
+
+        .login-container h2 {
+          margin-bottom: 20px;
+          color: #333;
+        }
+
+        .login-container input {
+          width: 100%;
+          padding: 12px;
+          margin: 10px 0;
+          border-radius: 8px;
+          border: 1px solid #ccc;
+          font-size: 16px;
+        }
+
+        .login-container button {
+          width: 100%;
+          padding: 12px;
+          background: #667eea;
+          color: white;
+          font-size: 16px;
+          border: none;
+          border-radius: 8px;
+          cursor: pointer;
+          transition: background 0.3s;
+        }
+
+        .login-container button:hover {
+          background: #5a67d8;
+        }
+
+        .error-msg {
+          margin-top: 15px;
+          color: red;
+          font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="login-container">
+    <h2>Login to SplitEase</h2>
+    <form id="loginForm">
+        <input type="text" id="username" placeholder="Username" required />
+        <input type="password" id="password" placeholder="Password" required />
+        <button type="submit">Login</button>
+    </form>
+    <div id="loginError" class="error-msg"></div>
+</div>
+
+<script>
+    document.getElementById("loginForm")?.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+
+      try {
+        const res = await fetch("http://localhost:8080/api/auth/login", {
+          method: "POST",
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        if (res.ok) {
+          const { token } = await res.json();
+          localStorage.setItem("token", token);
+          window.location.href = "dashboard.html";
+        } else {
+          document.getElementById("loginError").textContent = "Invalid credentials";
+        }
+      } catch (err) {
+        console.error("Login error:", err);
+        document.getElementById("loginError").textContent = "Server error. Please try again later.";
+      }
+    });
+</script>
+</body>
+</html>

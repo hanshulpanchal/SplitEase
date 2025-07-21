@@ -1,31 +1,26 @@
-package com.money.SplitEase.dto.mapper;
-
 import com.money.SplitEase.dto.ExpenseDTO;
 import com.money.SplitEase.model.Expense;
-import org.springframework.stereotype.Component;
+import com.money.SplitEase.model.Group;
+import com.money.SplitEase.model.User;
 
-@Component
-public class ExpenseMapper {
+public Expense toEntity(ExpenseDTO dto) {
+    Expense expense = new Expense();
+    expense.setId(dto.getId());
+    expense.setDescription(dto.getDescription());
+    expense.setAmount(dto.getAmount());
+    expense.setDate(dto.getDate());
 
-    public ExpenseDTO toDTO(Expense expense) {
-        ExpenseDTO dto = new ExpenseDTO();
-        dto.setId(expense.getId());
-        dto.setDescription(expense.getDescription());
-        dto.setAmount(expense.getAmount());
-        dto.setDate(expense.getDate());
-        dto.setPayerId(expense.getPayer().getId());
-        dto.setPayerName(expense.getPayer().getUsername());
-        dto.setGroupId(expense.getGroup().getId());
-        dto.setGroupName(expense.getGroup().getName());
-        return dto;
-    }
+    // Set minimal User and Group with only ID
+    User payer = new User();
+    payer.setId(dto.getPayerId());
+    expense.setPayer(payer);
 
-    public Expense toEntity(ExpenseDTO dto) {
-        Expense expense = new Expense();
-        expense.setId(dto.getId());
-        expense.setDescription(dto.getDescription());
-        expense.setAmount(dto.getAmount());
-        expense.setDate(dto.getDate());
-        return expense;
-    }
+    Group group = new Group();
+    group.setId(dto.getGroupId());
+    expense.setGroup(group);
+
+    return expense;
+}
+
+void main() {
 }

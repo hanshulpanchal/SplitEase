@@ -3,6 +3,7 @@ package com.money.SplitEase.service;
 import com.money.SplitEase.model.User;
 import com.money.SplitEase.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -43,6 +44,11 @@ public class UserService {
         }
         return false;
     }
+
+    private final PasswordEncoder passwordEncoder;
+
+
+
 
     public Optional<User> getUserByUsername(String username) {
         return userRepository.findByUsername(username);

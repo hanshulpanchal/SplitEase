@@ -1,4 +1,5 @@
 package com.money.SplitEase.controller;
+import com.money.SplitEase.dto.GroupDTO;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -19,8 +20,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -60,15 +63,27 @@ class GroupControllerTest {
 
     @Test
     void testCreateGroup() throws Exception {
-        Mockito.when(groupService.createGroup(any(Group.class))).thenReturn(sampleGroup);
+        GroupDTO groupDTO = new GroupDTO();
+        groupDTO.setId(1L);
+        groupDTO.setName("Test Group");
+        groupDTO.setMemberNames(Set.of("TestUser", "TestUser2"));
+
+        Group savedGroup = new Group();
+        savedGroup.setId(1L);
+        savedGroup.setName("Test Group");
+        savedGroup.setMembers(new HashSet<>()); // You can mock members too if needed
+
+        // Mock the service to return the saved group when receiving GroupDTO
+        Mockito.when(groupService.createGroup(any(GroupDTO.class))).thenReturn(savedGroup);
 
         mockMvc.perform(post("/api/groups")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(sampleGroup)))
+                        .content(objectMapper.writeValueAsString(groupDTO)))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$.id").value(1L))
                 .andExpect(jsonPath("$.name").value("Test Group"));
     }
+
 
     @Test
     void testGetGroupByIdFound() throws Exception {

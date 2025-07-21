@@ -37,12 +37,16 @@ public class Expense {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "payer_id", nullable = false)
     @ToString.Exclude
+// REMOVE THIS ↓↓↓
     private User payer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "group_d", nullable = false)
+    @JoinColumn(name = "group_id", nullable = false)
     @ToString.Exclude
+// REMOVE THIS ↓↓↓
     private Group group;
+
+
 
     @CreationTimestamp
     @Column(updatable = false)
