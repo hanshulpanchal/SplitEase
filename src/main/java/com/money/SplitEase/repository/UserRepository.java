@@ -33,4 +33,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      * Check if a user with username exists.
      */
     boolean existsByUsername(String username);
+
+    Optional<User> findByUsernameIgnoreCase(String username);
+
 }

@@ -1,7 +1,10 @@
-
 package com.money.SplitEase.controller;
 
+import com.money.SplitEase.dto.GroupDTO;
+import com.money.SplitEase.dto.mapper.GroupMapper;
 import com.money.SplitEase.model.Group;
+import com.money.SplitEase.model.User;
+import com.money.SplitEase.repository.UserRepository;
 import com.money.SplitEase.service.GroupService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-        import java.util.List;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/groups")
@@ -20,13 +26,26 @@ import java.util.Optional;
 public class GroupController {
 
     private final GroupService groupService;
+    private final UserRepository userRepository;   // ✅ Injected properly
+    private final GroupMapper groupMapper;         // ✅ Injected properly
+
 
     @PostMapping
-    public ResponseEntity<Group> createGroup(@Valid @RequestBody Group group) {
-        log.info("Creating group: {}", group.getName());
-        Group createdGroup = groupService.createGroup(group);
-        return new ResponseEntity<>(createdGroup, HttpStatus.CREATED);
+    public ResponseEntity<?> createGroup(@RequestBody GroupDTO groupDTO) {
+        try {
+            Group savedGroup = groupService.createGroup(groupDTO);
+            return ResponseEntity.ok(savedGroup);
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Something went wrong: " + e.getMessage()));
+        }
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<Group> getGroupById(@PathVariable Long id) {
@@ -47,7 +66,6 @@ public class GroupController {
         Optional<Group> updatedGroup = groupService.updateGroup(id, group);
         return ResponseEntity.ok(updatedGroup);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteGroup(@PathVariable Long id) {

@@ -15,7 +15,7 @@ public class GroupMapper {
         GroupDTO dto = new GroupDTO();
         dto.setId(group.getId());
         dto.setName(group.getName());
-        dto.setMemberIds(group.getMembers().stream().map(User::getId).collect(Collectors.toSet()));
+
         dto.setMemberNames(group.getMembers().stream().map(User::getUsername).collect(Collectors.toSet()));
         return dto;
     }

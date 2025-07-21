@@ -8,8 +8,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
-
 @Entity
 @Table(name = "groups")
 @Data
@@ -23,23 +23,20 @@ public class Group {
     private Long id;
 
     @NotBlank(message = "Group name is required")
-    @Size(min = 3, max = 100, message = "Group name must be between 3 and 100 characters")
+    @Size(min = 3, max = 100)
     private String name;
 
     @ManyToMany
     @JoinTable(
-            name = "user_group",
+            name = "group_members",
             joinColumns = @JoinColumn(name = "group_id"),
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     private Set<User> members;
 
+
     @OneToMany(mappedBy = "group", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
-    private Set<Expense> expenses;
+    private Set<Expense> expenses = new HashSet<>();
 
     @CreationTimestamp
     @Column(updatable = false)

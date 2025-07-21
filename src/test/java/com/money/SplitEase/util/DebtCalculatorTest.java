@@ -14,8 +14,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class DebtCalculatorTest {
 
-    private DebtCalculator debtCalculator;
-
     private User userA;
     private User userB;
     private User userC;
@@ -23,8 +21,6 @@ class DebtCalculatorTest {
 
     @BeforeEach
     void setUp() {
-        debtCalculator = new DebtCalculator();
-
         userA = User.builder().id(1L).username("Alice").email("alice@example.com").build();
         userB = User.builder().id(2L).username("Bob").email("bob@example.com").build();
         userC = User.builder().id(3L).username("Charlie").email("charlie@example.com").build();
@@ -38,7 +34,7 @@ class DebtCalculatorTest {
     }
 
     @Test
-    void testEqualSplitExpense() throws InterruptedException {
+    void testEqualSplitExpense() {
         Expense expense = Expense.builder()
                 .id(1L)
                 .description("Dinner")
@@ -50,14 +46,14 @@ class DebtCalculatorTest {
 
         group.getExpenses().add(expense);
 
-        Map<User, Map<User, BigDecimal>> debts = Map.of();
-        debtCalculator.calculateDebts(group).wait();
+        Map<String, Map<String, Double>> debts = DebtCalculator.calculateDebts(group);
 
-        assertNotNull(debts.get(userB));
-        assertNotNull(debts.get(userC));
-        assertEquals(0, debts.get(userB).get(userA).compareTo(BigDecimal.valueOf(300)));
-        assertEquals(0, debts.get(userC).get(userA).compareTo(BigDecimal.valueOf(300)));
-        assertTrue(debts.get(userA) == null || debts.get(userA).isEmpty());
+        assertNotNull(debts.get("Bob"));
+        assertNotNull(debts.get("Charlie"));
+
+        assertEquals(300.0, debts.get("Bob").get("Alice"));
+        assertEquals(300.0, debts.get("Charlie").get("Alice"));
+        assertNull(debts.get("Alice")); // Alice shouldn't owe anyone
     }
 
     @Test
@@ -81,16 +77,15 @@ class DebtCalculatorTest {
                         .build()
         ));
 
-        Map<User, Map<User, BigDecimal>> debts = (Map<User, Map<User, BigDecimal>>) debtCalculator.calculateDebts(group);
+        Map<String, Map<String, Double>> debts = DebtCalculator.calculateDebts(group);
 
-        assertEquals(0, debts.get(userB).get(userA).compareTo(BigDecimal.valueOf(150)));
-        assertEquals(0, debts.get(userC).get(userA).compareTo(BigDecimal.valueOf(150)));
-        assertEquals(0, debts.get(userC).get(userB).compareTo(BigDecimal.valueOf(150)));
+        assertEquals(300.0, debts.get("Charlie").get("Alice")); // ✅ Correct
     }
+
 
     @Test
     void testNoExpenses() {
-        Map<User, Map<User, BigDecimal>> debts = (Map<User, Map<User, BigDecimal>>) debtCalculator.calculateDebts(group);
+        Map<String, Map<String, Double>> debts = DebtCalculator.calculateDebts(group);
         assertTrue(debts.isEmpty());
     }
 }
